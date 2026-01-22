@@ -53,9 +53,16 @@ class Exporter:
 		child_table_fields = [df.fieldname for df in self.meta.fields if df.fieldtype in table_fieldtypes]
 
 		meta = frappe.get_meta(self.doctype)
-		exportable_fields = frappe._dict({})
+        exportable_fields = frappe._dict({})
 
-		for key, fieldnames in self.export_fields.items():
+        # Fix: Handle export_fields as list (v16 bug fix)
+        if isinstance(self.export_fields, list):
+            export_fields_dict = {self.doctype: self.export_fields}
+        else:
+            export_fields_dict = self.export_fields or {}
+
+        for key, fieldnames in export_fields_dict.items():
+
 			if key == self.doctype:
 				# parent fields
 				exportable_fields[key] = self.get_exportable_fields(key, fieldnames)
