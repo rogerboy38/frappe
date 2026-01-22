@@ -233,14 +233,26 @@ frappe.ui.form.on("Data Import", {
 	},
 
 	download_template(frm) {
+		console.log("Download Template clicked - loading bundle...");
 		frappe.require("data_import_tools.bundle.js", () => {
-			frm.data_exporter = new frappe.data_import.DataExporter(
-				frm.doc.reference_doctype,
-				frm.doc.import_type
-			);
+			console.log("Bundle loaded, creating DataExporter...");
+			try {
+				if (!frappe.data_import || !frappe.data_import.DataExporter) {
+					console.error("DataExporter class not found!");
+					frappe.msgprint(__("Error: DataExporter not loaded. Please refresh the page."));
+					return;
+				}
+				frm.data_exporter = new frappe.data_import.DataExporter(
+					frm.doc.reference_doctype,
+					frm.doc.import_type
+				);
+				console.log("DataExporter created successfully");
+			} catch (e) {
+				console.error("Error creating DataExporter:", e);
+				frappe.msgprint(__("Error loading export dialog: ") + e.message);
+			}
 		});
 	},
-
 	reference_doctype(frm) {
 		frm.trigger("toggle_submit_after_import");
 	},
